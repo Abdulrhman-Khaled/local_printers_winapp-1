@@ -73,7 +73,7 @@
     <p class="text-center">
         {{ company }}<br>
         <b>فاتورة ضريبية مبسطة</b><br>
-        <b>رقم الأوردر: {{ name }}</b>
+        <b>رقم الأوردر: {{ order_no }}</b>
     </p>
 
     <!-- QR Code (if available) -->
@@ -90,7 +90,10 @@
         <b>الرقم الضريبي:</b> {{ company_tax_id }}<br>
         {% endif %}
         <b>العميل:</b> {{ customer_name }}<br>
+        {% if tax_id %}
         <b>الرقم الضريبي للعميل:</b> {{ tax_id }}<br>
+        {% endif %}
+
         <b>التاريخ:</b> {{ posting_date }}<br>
         <b>الوقت:</b> {{ posting_time }}<br>
     </p>

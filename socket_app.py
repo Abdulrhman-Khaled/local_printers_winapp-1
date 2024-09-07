@@ -8,7 +8,7 @@ from printer_handlers import print_html
 import sys
 import os
 import glob
-
+import time
 
 app = Flask(__name__)
 
@@ -51,24 +51,7 @@ def send_printers_data(printers, config_data):
         print(f"Failed to send printers data. Status code: {response.status_code}, Response: {response.text}")
 
 
-def delete_files_by_name(names_list, directory='.'):
-    """Delete files in the current directory that match the list of names."""
-    for name in names_list:
-        # Construct the file search pattern
-        pattern = os.path.join(directory, f"{name}*")  # Matches any file that starts with the name
 
-        # Find all files that match the pattern
-        files_to_delete = glob.glob(pattern)
-        
-        for file_path in files_to_delete:
-            if os.path.exists(file_path):
-                try:
-                    os.remove(file_path)
-                    print(f"Deleted file: {file_path}")
-                except Exception as e:
-                    print(f"Failed to delete file {file_path}: {e}")
-            else:
-                print(f"File {file_path} not found for deletion.")
 
 @sio.event
 def connect():
@@ -94,9 +77,7 @@ def handle_sales_invoice_submitted(data):
     with app.app_context():
         invoice_name = data[0].get('name')
         print(f"Received Sales Invoice: <<{invoice_name}>> Submitted event. Number of invoices: {len(data)}")
-        printer_names = print_html(data, config_data)
-        # delete generated files with printer names
-        delete_files_by_name(printer_names, directory='.')  # Current directory
+        print_html(data, config_data)
 
 def fetch_session_cookies(config_data):
     """Log in to the server and fetch session cookies."""
@@ -148,6 +129,32 @@ def disconnect_socketio_client():
     except Exception as e:
         print(f"Error during disconnection: {str(e)}")
 
+
+
+
+def validate_domain(config_data):
+    """Validate domain periodically and exit script forcefully if invalid."""
+    try:
+        while True:
+            response = requests.get(
+                "https://localprinters.psc-s.com/api/method/local_printers.validate_users.validate_domain",
+                json={"domain": config_data["FRAPPE_SOCKET_URL"]}
+            )
+            response_data = response.json()
+
+            if response_data.get("message", {}).get("status") == "valid":
+                print(f"'{config_data['FRAPPE_SOCKET_URL']}' is valid. Proceeding with the connection...")
+            else:
+                print(f"'{config_data['FRAPPE_SOCKET_URL']}' is invalid. Exiting the script.")
+                os._exit(1)  # Forcefully exit the script
+
+            # Sleep for 36 seconds before checking again (you can adjust this to your needs)
+            time.sleep(3600)
+
+    except Exception as e:
+        print(f"An error occurred while validating the domain: {e}")
+        os._exit(1)  # Forcefully exit on error
+
 if __name__ == "__main__":
     # Load configuration from file
     config_path = "config.json"
@@ -155,3 +162,5 @@ if __name__ == "__main__":
 
     # Start the Socket.IO client in a separate thread
     Thread(target=run_socketio_client, args=(config_data,)).start()
+    # Start another thread to validate the domain
+    Thread(target=validate_domain, args=(config_data,)).start()
