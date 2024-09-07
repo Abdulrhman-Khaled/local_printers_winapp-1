@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ name }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans Arabic', sans-serif;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse; /* Collapse borders to prevent double borders */
+        }
+
+        table, th, td {
+            border: 1px solid black; /* Thinner borders */
+            padding: 8px; /* Add padding for a better layout */
+        }
+
+        .containerx {
+            padding: 0.25in;
+            text-align: center;
+            font-size: 16pt;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .qr-code {
+            width: 30%;
+        }
+
+        .letterhead {
+            width: 100%;
+            max-height: 200px;
+            margin-bottom: 10px;
+        }
+
+        th, td {
+            padding: 8px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+<div class="containerx">
+
+    <!-- Optional letterhead (injected dynamically from config_data) -->
+    {% if letterhead_image %}
+    <div class="text-center">
+        <img src="{{ letterhead_image }}" alt="Letterhead" class="letterhead">
+    </div>
+    {% endif %}
+
+    <p class="text-center" style="margin-bottom: 1rem">
+        EVA CAFE<br>
+        <b>فاتورة ضريبية مبسطة</b><br>
+        <span><b>رقم الأوردر:  {{ name }}</b></span>
+    </p>
+
+    <!-- QR Code (if available) -->
+    {% if ksa_einv_qr %}
+    <p class="text-center">
+        <img class="qr-code" src="{{ frappe_socket_url }}{{ ksa_einv_qr }}" alt="QR Code">
+    </p>
+    {% endif %}
+
+    <p>
+        <b>رقم الفاتورة :</b> {{ name }}<br>
+        <b>الكاشير:</b> {{ owner }}<br>
+        {% if company_tax_id %}
+        <b>الرقم الضريبي:</b> {{ company_tax_id }}<br>
+        {% endif %}
+        <b>العميل:</b> {{ customer_name }} <br>
+        <b>الرقم الضريبي للعميل:</b> {{ tax_id }}<br>
+        <b>التاريخ:</b> {{ posting_date }}<br>
+        <b>الوقت :</b> {{ posting_time }}<br>
+    </p>
+
+    <!-- Items Table -->
+    <table class="table table-condensed">
+        <thead>
+            <tr>
+                <th width="50%">الصنف</th>
+                <th width="25%" class="text-right">الكمية</th>
+                <th width="25%" class="text-right">المبلغ</th>
+            </tr>
+        </thead>
+        <tbody>
+            {%- for item in items -%}
+            <tr>
+                <td>{{ item.item_name }}</td>
+                <td class="text-right">{{ item.qty }}</td>
+                <td class="text-right">{{ item.amount }}</td>
+            </tr>
+            {%- endfor -%}
+        </tbody>
+    </table>
+
+    <!-- Totals and Taxes Table -->
+    <table class="table table-condensed no-border">
+        <tbody>
+            <tr>
+                <td class="text-left"><b>الإجمالي</b></td>
+                <td class="text-right">{{ total }}</td>
+            </tr>
+            {%- for row in taxes -%}
+            <tr>
+                <td class="text-left"><b>قيمة الضريبة {{ row.rate }}%</b></td>
+                <td class="text-right">{{ row.tax_amount }}</td>
+            </tr>
+            {%- endfor -%}
+            {%- if discount_amount -%}
+            <tr>
+                <td class="text-left"><b>الخصم</b></td>
+                <td class="text-right">{{ discount_amount }}</td>
+            </tr>
+            {%- endif -%}
+            <tr>
+                <td class="text-left"><b>المبلغ الإجمالي شامل الضريبة</b></td>
+                <td class="text-right">{{ grand_total }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Payments and Outstanding Amount -->
+    <table class="table table-condensed no-border">
+        <tbody>
+            {%- for row in payments -%}
+            <tr>
+                <td class="text-left">{{ row.mode_of_payment }}</td>
+                <td class="text-right">{{ row.amount }}</td>
+            </tr>
+            {%- endfor -%}
+            <tr>
+                <td class="text-left"><b>المبلغ المدفوع</b></td>
+                <td class="text-right">{{ paid_amount }}</td>
+            </tr>
+            {%- if outstanding_amount -%}
+            <tr>
+                <td class="text-left"><b>المبلغ المتبقي</b></td>
+                <td class="text-right">{{ outstanding_amount }}</td>
+            </tr>
+            {%- endif -%}
+        </tbody>
+    </table>
+
+    <hr>
+    <p>{{ terms or "" }}</p>
+    <p class="text-center">شكراً لك، نأمل زيارتك مرة أخرى.</p>
+</div>
+</body>
+</html>
