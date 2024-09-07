@@ -28,6 +28,7 @@ Thumbs.db
 
 # Ignore config.json if it's sensitive or environment-specific
 config.json
+config.py
 
 # Ignore other specific files you don't want to track
 gs10031w64.exe
