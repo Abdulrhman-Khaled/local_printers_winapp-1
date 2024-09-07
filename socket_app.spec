@@ -41,5 +41,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,  # Only needed for macOS code signing
     entitlements_file=None,  # Only needed for macOS
-    icon='static/applogo.ico'  # Path to the icon file (must be in .ico format)
+    icon='static/logo.ico'  # Path to the icon file (must be in .ico format)
 )

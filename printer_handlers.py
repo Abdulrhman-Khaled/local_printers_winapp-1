@@ -9,13 +9,16 @@ def get_printers():
     """Return a list of available printer names."""
     return [printer[2] for printer in win32print.EnumPrinters(win32print.PRINTER_ENUM_LOCAL)]
 
-def print_pdf_silent(pdf_path, printer_name):
-    """Print the PDF silently using the Windows print command."""
+def print_pdf_silent(pdf_path, printer_name, sumatra_pdf_path):
+    """Print the PDF silently using SumatraPDF."""
     try:
-        # Use the Windows 'print' command to send the PDF to the printer
-        # The `/d:` option specifies the target printer
-        command = f'print /d:"{printer_name}" "{pdf_path}"'
-        print(command)
+        # Path to SumatraPDF executable (change if installed elsewhere)
+        # get sumatra_pdf_path from config_data
+        
+        # Use SumatraPDF's -print-to command to print the PDF to the specified printer
+        command = f'"{sumatra_pdf_path}" -print-to "{printer_name}" "{pdf_path}"'
+        print(f"Executing command: {command}")
+
         # Run the command using subprocess
         subprocess.run(command, shell=True, check=True)
         print(f"Sent {pdf_path} to printer {printer_name} successfully.")
@@ -24,10 +27,13 @@ def print_pdf_silent(pdf_path, printer_name):
         print(f"Failed to print {pdf_path} on {printer_name}: {e}")
     except Exception as ex:
         print(f"An error occurred while printing the PDF: {ex}")
+
+
 def print_html(invoices_data, config_data):
     """Render HTML template to PDF and print to specified printers."""
     with current_app.app_context():
         path_wkhtmltopdf = config_data["WKHTMLTOPDF"]  # Path to wkhtmltopdf executable
+        sumatra_pdf_path = config_data.get("SUMATRA_PDF_PATH", r"C:\Program Files\SumatraPDF\SumatraPDF.exe")  # Path to SumatraPDF from config
         letterhead_image = config_data.get("LETTERHEAD_IMAGE")  # Get the letterhead image path
         frappe_socket_url = config_data.get("FRAPPE_SOCKET_URL")
         config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
@@ -49,7 +55,7 @@ def print_html(invoices_data, config_data):
                 
                 printer = invoice.get("printer")
                 if printer:
-                    print_pdf_silent(pdf_path, printer)
+                    print_pdf_silent(pdf_path, printer, sumatra_pdf_path)
                     printer_names.append(printer)
                 else:
                     print("Printer name not specified, skipping print.")

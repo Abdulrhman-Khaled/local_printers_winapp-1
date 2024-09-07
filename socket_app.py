@@ -136,11 +136,9 @@ def run_socketio_client(config_data):
                 print(f"Failed to connect or error during connection: {str(e)}")
         else:
             print(f"Validation failed: {response_data.get('message', {}).get('error', 'Unknown error')}")
-            sys.exit("Exiting due to failed validation.")
     
     except requests.exceptions.RequestException as e:
         print(f"Error during domain validation: {str(e)}")
-        sys.exit("Exiting the application due to a request error.")
 
 def disconnect_socketio_client():
     """Disconnect the Socket.IO client."""
