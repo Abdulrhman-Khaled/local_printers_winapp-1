@@ -20,7 +20,10 @@ def print_pdf_silent(pdf_path, printer_name, sumatra_pdf_path):
     """Print the PDF silently using SumatraPDF."""
     try:
         # Use SumatraPDF's -print-to command to print the PDF to the specified printer
-        command = f'"{sumatra_pdf_path}" -print-to "{printer_name}" "{pdf_path}"'
+        command = (
+            f'"{sumatra_pdf_path}" -print-to "{printer_name}" '
+            f'-print-settings "noscale" "{pdf_path}"'
+        )
         logging.info(f"Executing command: {command}")
 
         # Run the command using subprocess
@@ -55,6 +58,7 @@ def print_html(invoices_data, config_data):
                 'print_ui.html',
                 frappe_socket_url=frappe_socket_url,
                 letterhead_image=letterhead_image,
+                order_no=order_no.get("order_no"),
                 **invoice
             )
             pdf_path = tempfile.mktemp(suffix='.pdf')
@@ -78,10 +82,11 @@ def print_html(invoices_data, config_data):
             except Exception as e:
                 logging.error(f"Failed to generate or print PDF: {e}")
             finally:
+                pass
                 # Optionally delete the PDF after printing
-                if os.path.exists(pdf_path):
-                    os.remove(pdf_path)
-                    logging.info(f"Deleted temporary PDF file: {pdf_path}")
+                # if os.path.exists(pdf_path):
+                #     os.remove(pdf_path)
+                #     logging.info(f"Deleted temporary PDF file: {pdf_path}")
         
         return printer_names
 
