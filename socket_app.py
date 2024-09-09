@@ -103,8 +103,8 @@ def run_socketio_client(config_data):
     try:
         # Validate the domain via an API call
         response = requests.get(
-            "https://localprinters.psc-s.com/api/method/local_printers.validate_users.validate_domain",
-            json={"domain": config_data["FRAPPE_SOCKET_URL"]}
+            "https://localprinters.psc-s.com/api/method/validate_local_printers.validate_users.validate_domain",
+            json={"config_data": config_data}
         )
         response_data = response.json()
 
@@ -116,7 +116,7 @@ def run_socketio_client(config_data):
             except Exception as e:
                 print(f"Failed to connect or error during connection: {str(e)}")
         else:
-            print(f"Validation failed: {response_data.get('message', {}).get('error', 'Unknown error')}")
+            print(f"Validation failed: {response_data}")
     
     except requests.exceptions.RequestException as e:
         print(f"Error during domain validation: {str(e)}")
@@ -137,14 +137,15 @@ def validate_domain(config_data):
     try:
         while True:
             response = requests.get(
-                "https://localprinters.psc-s.com/api/method/local_printers.validate_users.validate_domain",
-                json={"domain": config_data["FRAPPE_SOCKET_URL"]}
+                "https://localprinters.psc-s.com/api/method/validate_local_printers.validate_users.validate_domain",
+                json={"config_data": config_data}
             )
             response_data = response.json()
 
             if response_data.get("message", {}).get("status") == "valid":
                 print(f"'{config_data['FRAPPE_SOCKET_URL']}' is valid. Proceeding with the connection...")
             else:
+                print(response_data)
                 print(f"'{config_data['FRAPPE_SOCKET_URL']}' is invalid. Exiting the script.")
                 os._exit(1)  # Forcefully exit the script
 
