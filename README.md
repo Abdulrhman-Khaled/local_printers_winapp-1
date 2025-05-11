@@ -7,6 +7,9 @@
 
 A robust Windows middleware application that bridges Frappe/ERPNext systems with local kitchen printers, enabling categorized printing of POS invoices with advanced features.
 
+## Ready to Download App .exe file without any hastl just adjust config json file and you are ready
+- Download [WinApp](https://drive.google.com/file/d/1cNjkUYX9frfpMDfXjiBgQf-arYV511ZE/view?usp=sharing) 
+
 ## Features
 
 ### Core Functionality
