@@ -1,19 +1,26 @@
-<div style="display: flex;
+<div style="
+    display: flex;
     flex-direction: column;
-    align-items: center;
-    width: 80mm!important;
-    text-align: center;">
-    
+    align-items: flex-start;
+    width: 72mm;
+    max-width: 72mm;
+    text-align: right;
+    direction: rtl;
+    font-family: 'Cairo', sans-serif;
+">
     <style>
-
-        p, div, table, img {
+        p,
+        div,
+        table,
+        img {
             margin: 0;
             padding: 0;
         }
 
-        div {
-            font-size: 18pt; /* Adjusted font size */
-            font-weight: bold; /* Added bold font weight */
+        div,
+        p {
+            font-size: 18px;
+            font-weight: bold;
         }
 
         .text-center {
@@ -23,157 +30,111 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 16pt; /* Slightly smaller font size */
-            font-weight: bold; /* Added bold font weight */
-            margin: auto; /* Centers the table horizontally */
+            font-size: 15px;
+            font-weight: bold;
+            margin: auto;
+            border: 1px solid #000;
         }
 
-        th, td {
-            padding: 2px; /* Slight padding to avoid excessive spacing */
+        th,
+        td {
+            padding: 2px;
             text-align: right;
+            border: 1px solid #000;
         }
 
-        .qr-code {
-            width: 150px; /* Adjusted QR code size */
-            height: 150px;
-        }
-
-        .letterhead {
+        hr {
             width: 100%;
-            max-height: 100px; /* Adjusted letterhead size */
+            margin: 10px 0;
+            border-top: 1px solid #000;
         }
-
     </style>
 
-    <!-- Optional letterhead -->
-    {% if letterhead_image %}
-    <div class="text-center">
-        <img src="{{ letterhead_image }}" alt="Letterhead" class="letterhead">
-    </div>
-    {% endif %}
-
-    <div class="text-center">
-        <div>
-            <b>فاتورة ضريبية مبسطة</b>
+    <div style="
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin: 10px 0;
+">
+        <div style="
+        border: 1px solid #000;
+        border-radius: 12px;
+        padding: 8px 16px;
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+        background-color: #f9f9f9;
+        min-width: 60%;
+    ">
+            رقم الفاتورة<br>{{ name.split('-')[-1] }}
         </div>
-        <div>
-            <b>رقم الأوردر: {{ order_no }}</b>
-        </div>
     </div>
 
-    <!-- QR Code -->
-    {% if ksa_einv_qr %}
-    <div class="text-center">
-        <img class="qr-code" src="{{ frappe_socket_url }}{{ ksa_einv_qr }}" alt="QR Code">
-    </div>
-    {% endif %}
+    <hr>
 
-    <div>
-        <b>رقم الفاتورة:</b> {{ name }}
-    </div>
     <div>
         <b>الكاشير:</b> {{ owner }}
     </div>
-    {% if company_tax_id %}
-    <div>
-        <b>الرقم الضريبي:</b> {{ company_tax_id }}
-    </div>
-    {% endif %}
+
+
     <div>
         <b>العميل:</b> {{ customer_name }}
     </div>
-    {% if tax_id %}
-    <div>
-        <b>الرقم الضريبي للعميل:</b> {{ tax_id }}
-    </div>
-    {% endif %}
 
     <div>
         <b>التاريخ:</b> {{ posting_date }}
     </div>
-    <div>
-        <b>الوقت:</b> {{ posting_time }}
-    </div>
 
-    <!-- Items Table -->
-    <table>
-        <thead>
-            <tr>
-                <th>الصنف</th>
-                <th>الكمية</th>
-                <th>السعر</th>
-                <th>المبلغ</th>
-            </tr>
-        </thead>
-        <tbody>
-            {%- for item in items -%}
-            <tr>
-                <td>{{ item.item_name }}</td>
-                <td>{{ item.qty }}</td>
-                <td>{{ item.rate }}</td>
-                <td>{{ item.amount }}</td>
-            </tr>
-            {%- endfor -%}
-        </tbody>
-    </table>
+    {% set parts = posting_time.split(':') %}
+    {% set hour = parts[0]|int %}
+    {% set minute = parts[1] %}
+    {% set am_pm = 'AM' if hour < 12 else 'PM' %} {% set display_hour=(hour % 12) if (hour % 12) !=0 else 12 %} <div>
+        <b>الوقت:</b> {{ "%02d" % display_hour }}:{{ minute }} {{ am_pm }}
+</div>
 
-    <!-- Totals and Taxes Table -->
-    <table>
-        <tbody>
-            <tr>
-                <td><b>الإجمالي</b></td>
-                <td>{{ total }}</td>
-            </tr>
-            {%- for row in taxes -%}
-            <tr>
-                <td><b>قيمة الضريبة {{ row.rate }}%</b></td>
-                <td>{{ row.tax_amount }}</td>
-            </tr>
-            {%- endfor -%}
-            {%- if discount_amount -%}
-            <tr>
-                <td><b>الخصم</b></td>
-                <td>{{ discount_amount }}</td>
-            </tr>
-            {%- endif -%}
-            <tr>
-                <td><b>المبلغ الإجمالي شامل الضريبة</b></td>
-                <td>{{ grand_total }}</td>
-            </tr>
-        </tbody>
-    </table>
+{% if posa_delivery_charges %}
+<div>
+    <b>التوصيل:</b> {{ posa_delivery_charges }}
+</div>
+{% endif %}
 
-    <!-- Payments and Outstanding Amount -->
-    <table>
-        <tbody>
-            {%- for row in payments -%}
-            <tr>
-                <td>{{ row.mode_of_payment }}</td>
-                <td>{{ row.amount }}</td>
-            </tr>
-            {%- endfor -%}
-            <tr>
-                <td><b>المبلغ المدفوع</b></td>
-                <td>{{ paid_amount }}</td>
-            </tr>
-            {%- if outstanding_amount -%}
-            <tr>
-                <td><b>المبلغ المتبقي</b></td>
-                <td>{{ outstanding_amount }}</td>
-            </tr>
-            {%- endif -%}
-        </tbody>
-    </table>
+<hr>
 
-    <!-- Additional Notes -->
-    {% if posa_notes %}
-    <b>{{ posa_notes }}</b>
-    {% endif %}
+<table>
+    <thead>
+        <tr>
+            <th>الصنف</th>
+            <th>الكمية</th>
+            <th>السعر</th>
+            <th>المبلغ</th>
+        </tr>
+    </thead>
 
-    <hr>
-    {% if terms %}
-    <b>{{ terms }}</b>
-    {% endif %}
-    <b class="text-center">شكراً لك، نأمل زيارتك مرة أخرى.</b>
+    <tbody>
+        {%- for item in items -%}
+        <tr>
+            <td>{{ item.item_name }}</td>
+            <td>{{ item.qty }}</td>
+            <td>{{ item.rate }}</td>
+            <td>{{ item.amount }}</td>
+        </tr>
+        {%- endfor -%}
+    </tbody>
+</table>
 
+<hr>
+
+<div>
+    <b>إجمالي الأصناف:</b> {{ total }}
+</div>
+
+<div>
+    <b>رسوم التوصيل:</b> {{ posa_delivery_charges_rate }}
+</div>
+
+<div>
+    <b>الإجمالي:</b> {{ grand_total }}
+</div>
+
+<hr>
 </div>

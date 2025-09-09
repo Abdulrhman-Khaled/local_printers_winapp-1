@@ -165,3 +165,18 @@ This enhanced README includes:
 9. Related project links
 
 The document provides everything needed to understand, install, configure, and troubleshoot the application.
+
+```
+local_printers_winapp
+├─ local_printers.spec
+├─ printer_handlers.py
+├─ README.md
+├─ requirements.txt
+├─ socket_app.py
+├─ socket_app.spec
+├─ static
+│  └─ logo.ico
+└─ templates
+   └─ print_ui.html
+
+```
